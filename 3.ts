@@ -219,7 +219,6 @@
       }
     });
 
-    // +1?
     digitArray = digitArray.slice(highestDigit.index + 1);
 
     digitArray.forEach((digit) => {
