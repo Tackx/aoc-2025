@@ -350,7 +350,7 @@
 
   let removableRollsCount = 0;
 
-  //   Flag determining whether to use test or real data
+  // Flag determining whether to use test or real data
   const rows = data;
 
   let continueWithIteration = true;
