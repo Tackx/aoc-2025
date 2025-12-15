@@ -2455,11 +2455,14 @@
     let current = range;
 
     if (last.start > current.end || last.end < current.start) {
+      // There is no overlap, nothing to defragment
       defragmentedRanges.push({ ...current });
     } else {
+      // Set start to the lowest value and end to the highest value of the two overlapping ranges
       const start = current.start < last.start ? current.start : last.start;
       const end = current.end > last.end ? current.end : last.end;
 
+      // Update the last item in the defragmentedRanges array to contain the entire range covered by the two overlapping ranges
       defragmentedRanges[defragmentedRanges.length - 1] = { start, end };
     }
   }
