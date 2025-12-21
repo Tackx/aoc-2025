@@ -1060,7 +1060,6 @@
 
   junctionBoxes.forEach((box) => circuits.push([box]));
 
-  // Go over distances
   distances.forEach((distance, distanceIndex) => {
     if (distanceIndex < 1000) {
       const boxA = junctionBoxes[distance.aIndex];
