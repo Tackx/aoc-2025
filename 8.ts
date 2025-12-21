@@ -1,14 +1,6 @@
 {
   // Part 1
 
-  enum Coord {
-    x = 0,
-    y,
-    z
-  }
-
-  type Vec3 = [number, number, number];
-
   const data: Vec3[] = [
     [35108, 7154, 46020],
     [79269, 47234, 23780],
@@ -1035,6 +1027,14 @@
     [425, 690, 689]
   ];
 
+  enum Coord {
+    x = 0,
+    y,
+    z
+  }
+
+  type Vec3 = [number, number, number];
+
   // Source switch between real puzzle input and example input
   const junctionBoxes = data;
 
@@ -1053,63 +1053,44 @@
     return a.distance - b.distance;
   });
 
-  let circuits = [junctionBoxes] as Vec3[][];
+  let circuits = [] as Vec3[][];
+  // [      ] - Circuits
+  //  [    ]  - Circuit
+  //   [  ]   - Box containing coords
+
+  junctionBoxes.forEach((box) => circuits.push([box]));
 
   // Go over distances
   distances.forEach((distance, distanceIndex) => {
     if (distanceIndex < 1000) {
-      // If there are any active circuits with this junctionBox (except index 0 which are inactive), push the junctionBox there
-      const foundBoxAIndex = circuits.findIndex((circuit, i) => {
-        if (distanceIndex === 0 || i === 0) {
-          return false;
-        }
+      const boxA = junctionBoxes[distance.aIndex];
+      const boxB = junctionBoxes[distance.bIndex];
 
-        return circuit.some((circuit) => circuit.every((coord, coordIndex) => coord === junctionBoxes[distance.aIndex][coordIndex]));
+      // Find index of circuit containing box A
+      const foundBoxACircuitIndex = circuits.findIndex((circuit) => {
+        return circuit.some((box) => box.every((coord, coordIndex) => coord === boxA[coordIndex]));
       });
 
-      const foundBoxBIndex = circuits.findIndex((circuit, i) => {
-        if (distanceIndex === 0 || i === 0) {
-          return false;
-        }
-
-        return circuit.some((circuit) => circuit.every((coord, coordIndex) => coord === junctionBoxes[distance.bIndex][coordIndex]));
+      // Find index of circuit containing box B
+      const foundBoxBCircuitIndex = circuits.findIndex((circuit) => {
+        return circuit.some((box) => box.every((coord, coordIndex) => coord === boxB[coordIndex]));
       });
 
-      if (foundBoxAIndex === -1 && foundBoxBIndex === -1) {
-        circuits.push([junctionBoxes[distance.aIndex], junctionBoxes[distance.bIndex]]);
-        circuits[0] = circuits[0].filter((circuit) => JSON.stringify(circuit) !== JSON.stringify(junctionBoxes[distance.aIndex]) && JSON.stringify(circuit) !== JSON.stringify(junctionBoxes[distance.bIndex]));
-      } else if (foundBoxAIndex !== foundBoxBIndex) {
-        if (foundBoxAIndex !== -1 && foundBoxBIndex !== -1) {
-          circuits[foundBoxAIndex] = circuits[foundBoxAIndex].concat(circuits[foundBoxBIndex]);
-          circuits[foundBoxBIndex] = [];
-        } else if (foundBoxAIndex !== -1) {
-          circuits[foundBoxAIndex].push(junctionBoxes[distance.bIndex]);
-          circuits[0] = circuits[0].filter((circuit) => JSON.stringify(circuit) !== JSON.stringify(junctionBoxes[distance.bIndex]));
-        } else if (foundBoxBIndex !== -1) {
-          circuits[foundBoxBIndex].push(junctionBoxes[distance.aIndex]);
-          circuits[0] = circuits[0].filter((circuit) => JSON.stringify(circuit) !== JSON.stringify(junctionBoxes[distance.aIndex]));
-        }
+      // If the indexes are the same, no need to do anything
+      // because the boxes are already in the same circuit
+      // Otherwise, merge B into A and set B to an empty array (will be filtered out later)
+      if (foundBoxACircuitIndex !== foundBoxBCircuitIndex) {
+        circuits[foundBoxACircuitIndex] = circuits[foundBoxACircuitIndex].concat(circuits[foundBoxBCircuitIndex]);
+        circuits[foundBoxBCircuitIndex] = [];
       }
     }
   });
 
-  circuits = circuits.filter((circuit) => circuit.length !== 0);
+  circuits = circuits.filter((circuit) => circuit.length > 0);
 
-  const flattenedCircuits = [] as Vec3[][];
+  circuits.sort((a, b) => b.length - a.length);
 
-  circuits.forEach((circuit, index) => {
-    if (index === 0) {
-      circuit.forEach((v) => flattenedCircuits.push([v]));
-    } else {
-      flattenedCircuits.push(circuit);
-    }
-  });
-
-  flattenedCircuits.sort((a, b) => b.length - a.length);
-
-  console.log(flattenedCircuits);
-
-  const result = flattenedCircuits.reduce((prev, current, index) => {
+  const result = circuits.reduce((prev, current, index) => {
     if (index < 3) {
       return prev * current.length;
     }
