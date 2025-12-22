@@ -2162,35 +2162,39 @@
   let lastMovedBoxA: Vec3 = [0, 0, 0] as Vec3;
   let lastMovedBoxB: Vec3 = [0, 0, 0] as Vec3;
 
-  while (circuits.length !== 1) {
-    distances.forEach((distance, distanceIndex) => {
-      const boxA = junctionBoxes[distance.aIndex];
-      const boxB = junctionBoxes[distance.bIndex];
+  for (let distanceIndex = 0; distanceIndex < distances.length; distanceIndex++) {
+    const distance = distances[distanceIndex];
 
-      // Find index of circuit containing box A
-      const foundBoxACircuitIndex = circuits.findIndex((circuit) => {
-        return circuit.some((box) => box.every((coord, coordIndex) => coord === boxA[coordIndex]));
-      });
+    const boxA = junctionBoxes[distance.aIndex];
+    const boxB = junctionBoxes[distance.bIndex];
 
-      // Find index of circuit containing box B
-      const foundBoxBCircuitIndex = circuits.findIndex((circuit) => {
-        return circuit.some((box) => box.every((coord, coordIndex) => coord === boxB[coordIndex]));
-      });
-
-      // If the indexes are the same, no need to do anything
-      // because the boxes are already in the same circuit
-      // Otherwise, merge B into A and set B to an empty array (will be filtered out later)
-      if (foundBoxACircuitIndex !== foundBoxBCircuitIndex) {
-        // Remember which boxes were just moved
-        lastMovedBoxA = boxA;
-        lastMovedBoxB = boxB;
-
-        circuits[foundBoxACircuitIndex] = circuits[foundBoxACircuitIndex].concat(circuits[foundBoxBCircuitIndex]);
-        circuits[foundBoxBCircuitIndex] = [];
-      }
+    // Find index of circuit containing box A
+    const foundBoxACircuitIndex = circuits.findIndex((circuit) => {
+      return circuit.some((box) => box.every((coord, coordIndex) => coord === boxA[coordIndex]));
     });
 
+    // Find index of circuit containing box B
+    const foundBoxBCircuitIndex = circuits.findIndex((circuit) => {
+      return circuit.some((box) => box.every((coord, coordIndex) => coord === boxB[coordIndex]));
+    });
+
+    // If the indexes are the same, no need to do anything
+    // because the boxes are already in the same circuit
+    // Otherwise, merge B into A and set B to an empty array (will be filtered out later)
+    if (foundBoxACircuitIndex !== foundBoxBCircuitIndex) {
+      // Remember which boxes were just moved
+      lastMovedBoxA = boxA;
+      lastMovedBoxB = boxB;
+
+      circuits[foundBoxACircuitIndex] = circuits[foundBoxACircuitIndex].concat(circuits[foundBoxBCircuitIndex]);
+      circuits[foundBoxBCircuitIndex] = [];
+    }
+
     circuits = circuits.filter((circuit) => circuit.length > 0);
+
+    if (circuits.length === 1) {
+      break;
+    }
   }
 
   // Correct - 9069509600
